@@ -85,8 +85,8 @@ class NexusDIContainer:
         # Event Bus (singleton)
         self.register_singleton("event_bus", lambda c: EventBus(
             EventBusConfig(
-                max_history=10000,
-                async_enabled=True
+                history_size=10000,
+                async_mode=True
             )
         ))
         

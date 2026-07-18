@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+package nexus.integration;
+
+option go_package = "github.com/profi-a/nexus-integration/pb";
+option java_multiple_files = true;
+option java_package = "com.profia.nexus.integration.pb";
+
+// ===== ПОИСК =====
+
+message SearchRequest {
+  string query = 1;                    // Поисковый запрос
+  int32 limit = 2;                     // Лимит результатов (по умолчанию 50)
+  string search_type = 3;              // "fts5", "semantic", "graph" (по умолчанию "fts5")
+  map<string, string> filters = 4;     // Дополнительные фильтры
+}
+
+message SearchResult {
+  string entry_id = 1;                 // ID записи
+  string title = 2;                    // Заголовок
+  string content = 3;                  // Содержимое (фрагмент)
+  float relevance = 4;                 // Релевантность (0.0-1.0)
+  string entry_type = 5;               // Тип: "document", "project", "note"
+  map<string, string> metadata = 6;    // Дополнительные метаданные
+  int64 updated_at = 7;                // Timestamp последнего обновления
+}
+
+message SearchResponse {
+  int32 result_count = 1;              // Всего результатов
+  repeated SearchResult results = 2;   // Результаты поиска
+  float elapsed_ms = 3;                // Время выполнения (ms)
+  string error = 4;                    // Ошибка (если есть)
+}
+
+// ===== ИНДЕКСИРОВАНИЕ =====
+
+message IngestRequest {
+  string file_path = 1;                // Путь до файла для индексирования
+  string content = 2;                  // Или прямой контент
+  string content_type = 3;             // "text", "pdf", "markdown", "docx"
+  map<string, string> metadata = 4;    // Метаданные документа
+}
+
+message IngestResponse {
+  string entry_id = 1;                 // ID созданной записи в vault
+  bool success = 2;                    // Успешность операции
+  string message = 3;                  // Сообщение об ошибке/успехе
+  float elapsed_ms = 4;                // Время обработки
+}
+
+// ===== СКАНИРОВАНИЕ ПРОЕКТОВ =====
+
+message ScanProjectRequest {
+  string project_root = 1;             // Корневая папка проекта
+  repeated string include_patterns = 2; // Включить (*.md, *.py и т.д.)
+  repeated string exclude_patterns = 3; // Исключить (.git, node_modules и т.д.)
+  bool deep_scan = 4;                  // Глубокое сканирование (анализ содержимого)
+}
+
+message FileInfo {
+  string file_path = 1;                // Относительный путь
+  string file_type = 2;                // "code", "document", "config", "media"
+  int64 file_size = 3;                 // Размер в байтах
+  string language = 4;                 // Язык программирования (если применимо)
+}
+
+message ScanProjectResponse {
+  int32 files_found = 1;               // Найдено файлов
+  int32 files_indexed = 2;             // Индексировано файлов
+  repeated FileInfo files = 3;         // Информация о файлах
+  bool success = 4;                    // Успешность сканирования
+  float elapsed_ms = 5;                // Время выполнения
+  string error = 6;                    // Ошибка (если есть)
+}
+
+// ===== УПРАВЛЕНИЕ СИСТЕМОЙ =====
+
+message HealthCheckRequest {
+  // пусто
+}
+
+message HealthCheckResponse {
+  string status = 1;                   // "healthy", "degraded", "unhealthy"
+  string version = 2;                  // Версия Nexus Driver
+  map<string, string> modules = 3;     // Статус модулей: vault, fts5, rules, graphify, neural, trash, file_mapper
+  map<string, int64> stats = 4;        // Базовая статистика: total_entries, indexed_entries, etc
+}
+
+message ShutdownRequest {
+  bool graceful = 1;                   // Graceful shutdown (по умолчанию true)
+}
+
+message ShutdownResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// ===== КОНФИГУРАЦИЯ =====
+
+message IntegrationConfig {
+  string mode = 1;                     // "integration" (отключает auto-update)
+  bool enable_auto_update = 2;         // false для интеграции
+  int32 update_check_days = 3;         // Игнорируется если auto-update отключен
+  bool enable_events = 4;              // true для event tracking
+  bool enable_caching = 5;             // true для production
+}
+
+message ConfigRequest {
+  IntegrationConfig config = 1;        // Новая конфигурация
+}
+
+message ConfigResponse {
+  bool success = 1;
+  IntegrationConfig applied_config = 2;
+  string message = 3;
+}
+
+// ===== ОСНОВНОЙ СЕРВИС =====
+
+service NexusSearch {
+  // Быстрый полнотекстовый поиск по проектам и документам
+  rpc Search(SearchRequest) returns (SearchResponse);
+  
+  // Индексирование документа или файла
+  rpc Ingest(IngestRequest) returns (IngestResponse);
+  
+  // Сканирование и индексирование проекта
+  rpc ScanProject(ScanProjectRequest) returns (ScanProjectResponse);
+  
+  // Проверка здоровья системы
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // Применить конфигурацию (отключить auto-update и т.д.)
+  rpc ApplyConfig(ConfigRequest) returns (ConfigResponse);
+  
+  // Graceful shutdown
+  rpc Shutdown(ShutdownRequest) returns (ShutdownResponse);
+}

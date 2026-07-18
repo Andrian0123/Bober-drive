@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nexus-extended"
-version = "2.1.0"
+version = "3.0.0"
 description = "Nexus Extended Architecture - Local-first multi-project management system"
 readme = "README.md"
 requires-python = ">=3.7"
