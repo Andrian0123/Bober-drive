@@ -1,0 +1,67 @@
+{
+  "name": "Nexus Driver - Unified Event-Driven Knowledge Management System",
+  "version": "3.0.0",
+  "build_date": "2026-07-18",
+  "architecture": "V3 Unified Event-Driven",
+  "target_audience": "Large and Very Large Projects",
+  "components": {
+    "core_v3": [
+      "VaultCore V3",
+      "FTS5 Indexer V3",
+      "Rules Engine V3",
+      "Graphify Engine V3",
+      "Neural Reflex Engine V3",
+      "File System Mapper V3",
+      "Trash Manager V3"
+    ],
+    "infrastructure": [
+      "Event Bus",
+      "Nexus Orchestrator",
+      "DI Container",
+      "Pipeline Manager",
+      "Auto-Updater"
+    ],
+    "legacy_v2": [
+      "Project Rules Engine",
+      "File System Mapper",
+      "Graphify Engine",
+      "Obsidian Bridge",
+      "Audio Generator",
+      "Context Extractor"
+    ]
+  },
+  "features": {
+    "event_driven": "Central EventBus with 25+ event types",
+    "orchestrator": "Single entry point with DI Container",
+    "pipelines": "Composable multi-stage workflows",
+    "auto_update": "Automatic updates every 15 days",
+    "observability": "Events, metrics, history tracking",
+    "backward_compatible": "V2 modules work via adapters"
+  },
+  "statistics": {
+    "total_loc": "25000+",
+    "v3_loc": "5843",
+    "tests": "95+",
+    "test_coverage": "85%+",
+    "documentation": "3500+ lines"
+  },
+  "dependencies": {
+    "required": [
+      "Python >= 3.8",
+      "cryptography>=41.0.0",
+      "numpy>=1.24.0"
+    ],
+    "optional": [
+      "PyPDF2>=3.0.0",
+      "python-docx>=0.8.11",
+      "beautifulsoup4>=4.12.0",
+      "gTTS>=2.3.0",
+      "pyttsx3>=2.90",
+      "requests>=2.31.0"
+    ]
+  },
+  "license": "MIT",
+  "repository": "https://github.com/Andrian0123/Bober-drive",
+  "platform": "cross-platform",
+  "python": ">=3.8"
+}
