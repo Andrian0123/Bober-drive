@@ -1,0 +1,80 @@
+# Kimi project memory
+.kimi-memory/
+
+# Ollama Agent Hub
+# Логи
+logs/
+*.log
+
+# Ollama данные
+.ollama/
+models/
+
+# Переменные окружения
+.env
+.env.local
+
+# Конфигурации агентов (генерируемые)
+agents/*/runtime/
+agents/*/cache/
+
+# Кэш плагинов
+plugins/cache/
+plugins/*.pyc
+plugins/__pycache__/
+
+# Временные файлы
+*.tmp
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Node
+node_modules/
+package-lock.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+
+# Docker volumes
+docker-volumes/
+
+# Build artifacts (Nexus)
+build/
+dist/
+*.egg-info/
+.eggs/
+*.whl
+*.tar.gz
+
+# Test artifacts
+test_registry/
+test_workspace/
+test_memory.db
+test_structured.db
+test_vector/
+test_integration/
+test_integration_workspace/
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Nexus runtime
+.nexus/cache.json
+.nexus/memory.db
+.nexus/scan_check.json
