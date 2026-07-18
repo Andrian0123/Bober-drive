@@ -209,6 +209,21 @@ python driver/demo_week4_6_integration.py
                                       └───────────────┘
 ```
 
+### Development Checkpoints
+
+**Nexus Driver v3** следует методологии контрольных точек — каждая неделя доставляет законченный, протестированный модуль:
+
+```
+✅ Week 1: VaultCore — Encrypted storage foundation
+✅ Week 2: Neural Reflex — 3-level parallel search
+✅ Week 3: FTS5 + Trash — Full-text search & safe deletion
+✅ Week 4-6: Advanced — Rules, Mapper, Graphify, Obsidian, Audio
+
+Total: 11 modules | 4,900+ LoC | 100+ tests | 17 docs
+```
+
+📖 **Подробности:** [driver/DRIVER-CHECKPOINTS-ARCHITECTURE.md](driver/DRIVER-CHECKPOINTS-ARCHITECTURE.md)
+
 ### Key Design Principles
 
 - **Modularity** — Each module is independent but integrated
