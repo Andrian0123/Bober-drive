@@ -6,7 +6,7 @@
 
 ### 🎉 Production-Ready Release: Autonomous Knowledge Management System
 
-#### Добавлено — Week 4-6 (5 новых модулей)
+#### Новые модули (5 штук)
 
 **1. Project Rules Engine** (`nexus_project_rules.py`)
 - Автоматическое сканирование и парсинг проектных правил (.md, .yaml, .txt)
@@ -47,7 +47,7 @@
 - Поддержка настроек голоса (язык, скорость, громкость)
 - Генерация аудио напрямую из VaultCore записей
 
-#### Модули Week 1-3 (обновлены)
+#### Основные модули (обновлены)
 
 **VaultCore** (`vault_core.py`)
 - Зашифрованное хранилище знаний с SQLite
@@ -79,20 +79,20 @@
 
 #### Тесты
 
-**Week 4-6 Test Suite** (`test_nexus_week4_6.py`)
+**Новые тесты** (`test_nexus_week4_6.py`)
 - 36 новых тестов для 5 модулей
 - Integration tests для cross-module workflows
 - Edge case tests
 - Performance tests
 - Exit code: 0 (все тесты проходят после установки зависимостей)
 
-**Week 1-3 Tests** (обновлены)
+**Базовые тесты** (обновлены)
 - 50+ unit tests для core модулей
 - Все основные тесты проходят (88% success rate)
 
 #### Демонстрация
 
-**Week 4-6 Integration Demo** (`demo_week4_6_integration.py`)
+**Integration Demo** (`demo_week4_6_integration.py`)
 - Полный pipeline: Project Rules → File Mapper → Graphify → Obsidian → Audio
 - Интеграция с Neural Reflex
 - Создание демо-проекта с реальными файлами
@@ -113,7 +113,7 @@
 - `DEPLOYMENT-GUIDE-WEEK4-6.md` — Deployment instructions
 - `DOCUMENTATION-INDEX-WEEK4-6.md` — Complete documentation index
 
-**Week Summaries:**
+**Отчёты:**
 - `WEEK4-6-FINAL-SUMMARY.md` — Executive summary
 - `WEEK4-6-DELIVERY-COMPLETE.md` — Delivery checklist
 - `WEEK4-6-README.md` — Module overview
@@ -130,8 +130,8 @@
 **Статистика кода:**
 - **Всего:** 15,000+ строк кода и документации
 - **Продакшн код:** 9,100+ LoC (9 модулей)
-  - Week 4-6: 3,251 LoC (5 модулей)
-  - Week 1-3: 5,849 LoC (4 модуля)
+  - Новые модули: 3,251 LoC (5 модулей)
+  - Базовые модули: 5,849 LoC (4 модуля)
 - **Тесты:** 1,369 LoC (86 тестов)
 - **Документация:** 4,500+ строк (20+ файлов)
 
@@ -158,7 +158,7 @@
 - Lexical: 100-200ms
 - Syntactic: 50-150ms
 
-**Модули Week 4-6:**
+**Продвинутые модули:**
 - Project Rules scan: <1s для 100+ файлов
 - File Mapper scan: <2s для 1000+ файлов
 - Graphify import: <500ms на документ
@@ -200,7 +200,7 @@ requests>=2.31.0       # Ollama TTS
 
 ## [2.1.0] - 2026-07-15
 
-### Обновления Week 1-3
+### Обновления базовых модулей
 
 **VaultCore Improvements:**
 - Улучшена производительность semantic_search
@@ -221,20 +221,20 @@ requests>=2.31.0       # Ollama TTS
 
 ## [2.0.0] - 2026-07-10
 
-### 🎉 Week 1-3 Foundation Release
+### 🎉 Foundation Release
 
-#### Week 1: Vault Core
-- Зашифрованное хранилище знаний
+#### Базовые модули
+- Зашифрованное хранилище знаний (VaultCore)
 - Граф связей
 - Семантический поиск
 - Версионирование
 
-#### Week 2: Neural Reflex + Context Extraction
+#### Neural Reflex + Context Extraction
 - Параллельный поиск на 3 уровнях
 - Интеллектуальное ранжирование
 - Извлечение контекста
 
-#### Week 3: FTS5 Extension + Trash Manager
+#### FTS5 Extension + Trash Manager
 - Полнотекстовый поиск
 - Безопасное удаление с TTL
 - Audit trail
