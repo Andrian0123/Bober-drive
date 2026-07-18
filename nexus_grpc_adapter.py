@@ -72,6 +72,20 @@ class NexusGRPCAdapter:
         )
         logger.info(f"gRPC adapter initialized on port {self.port}, auto-update: ОТКЛЮЧЕН")
     
+    def _get_version(self) -> str:
+        """Получить версию Nexus Driver"""
+        try:
+            # Попытка прочитать VERSION.json
+            version_file = Path(__file__).parent / "VERSION.json"
+            if version_file.exists():
+                import json
+                with open(version_file) as f:
+                    data = json.load(f)
+                    return data.get("version", "3.0.0")
+        except:
+            pass
+        return "3.0.0"
+    
     # ========== gRPC RPC Методы (mock-версия, заменить на proto-generated) ==========
     
     def search(self, query: str, limit: int = 50, search_type: str = "fts5") -> Dict[str, Any]:

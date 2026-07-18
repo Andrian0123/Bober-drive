@@ -1,0 +1,167 @@
+{
+  "name": "nexus-code",
+  "displayName": "Nexus Code",
+  "description": "Intelligent code completion and documentation search powered by Nexus",
+  "version": "3.0.0",
+  "publisher": "nexus-team",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.75.0",
+    "node": "^18.0.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Formatters",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "completion",
+    "search",
+    "documentation",
+    "lsp",
+    "nexus"
+  ],
+  "icon": "images/nexus-icon.png",
+  "activationEvents": [
+    "onLanguage:python",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:java",
+    "onLanguage:rust",
+    "onLanguage:go",
+    "onLanguage:cpp",
+    "onLanguage:csharp",
+    "onLanguage:markdown",
+    "onCommand:searchDocumentation",
+    "onCommand:indexProject",
+    "onCommand:toggleCompletion",
+    "onCommand:showStats",
+    "onCommand:openSettings"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "searchDocumentation",
+        "title": "Nexus: Search Documentation",
+        "description": "Search across indexed documentation and code"
+      },
+      {
+        "command": "indexProject",
+        "title": "Nexus: Index Project",
+        "description": "Scan and index current project"
+      },
+      {
+        "command": "toggleCompletion",
+        "title": "Nexus: Toggle Completion",
+        "description": "Enable/disable code completion"
+      },
+      {
+        "command": "showStats",
+        "title": "Nexus: Show Statistics",
+        "description": "Display vault and token usage statistics"
+      },
+      {
+        "command": "openSettings",
+        "title": "Nexus: Open Settings",
+        "description": "Configure Nexus extension"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "searchDocumentation",
+        "key": "ctrl+shift+d",
+        "mac": "cmd+shift+d",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "indexProject",
+        "key": "ctrl+shift+i",
+        "mac": "cmd+shift+i",
+        "when": "editorTextFocus"
+      }
+    ],
+    "configuration": {
+      "title": "Nexus",
+      "properties": {
+        "nexus.lspServerPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Path to Python executable (for running LSP server)"
+        },
+        "nexus.lspServerScript": {
+          "type": "string",
+          "default": "driver/lsp_server.py",
+          "description": "Path to LSP server script"
+        },
+        "nexus.completionEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable code completion via Nexus"
+        },
+        "nexus.hoverEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable hover documentation"
+        },
+        "nexus.maxCompletionItems": {
+          "type": "integer",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 50,
+          "description": "Maximum number of completion items to show"
+        },
+        "nexus.tokenCountingEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Track and report token usage for LLM calls"
+        },
+        "nexus.vaultPath": {
+          "type": "string",
+          "default": "~/.nexus/integration/vault.db",
+          "description": "Path to Nexus vault database"
+        },
+        "nexus.grpcPort": {
+          "type": "integer",
+          "default": 50051,
+          "description": "gRPC server port"
+        },
+        "nexus.projectRoot": {
+          "type": "string",
+          "default": "${workspaceFolder}",
+          "description": "Project root for scanning and indexing"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.50.0",
+    "@typescript-eslint/parser": "^5.50.0",
+    "eslint": "^8.32.0",
+    "typescript": "^4.9.0"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^8.1.0",
+    "axios": "^1.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nexus-team/nexus-code.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nexus-team/nexus-code/issues"
+  },
+  "homepage": "https://github.com/nexus-team/nexus-code"
+}

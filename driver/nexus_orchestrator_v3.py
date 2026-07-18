@@ -80,7 +80,7 @@ class NexusDIContainer:
     def _register_core_services(self):
         """Register core Nexus services"""
         # Import here to avoid circular dependencies
-        from core.event_bus import EventBus, EventBusConfig
+        from driver.core.event_bus import EventBus, EventBusConfig
         
         # Event Bus (singleton)
         self.register_singleton("event_bus", lambda c: EventBus(
@@ -335,7 +335,7 @@ class NexusPipeline:
         Returns:
             Dictionary with results from all stages
         """
-        from core.event_bus import WorkflowStarted, WorkflowCompleted, WorkflowFailed
+        from driver.core.event_bus import WorkflowStarted, WorkflowCompleted, WorkflowFailed
         
         workflow_id = f"pipeline_{self.name}_{secrets.token_hex(4)}"
         start_time = datetime.now()
