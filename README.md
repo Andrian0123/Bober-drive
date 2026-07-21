@@ -212,6 +212,27 @@ adapter.start()
 Ctrl+Shift+P → "Search Documentation"
 ```
 
+### 📊 Web Dashboard
+
+Monitor statistics and performance in real-time:
+
+```bash
+# Quick start (auto-opens http://localhost:8000)
+python launch_dashboard.py
+
+# Custom configuration
+python driver/dashboard.py --project ./docs --port 8000
+```
+
+**Dashboard Features:**
+- 📈 Real-time metrics (files indexed, cache hit rate, search time)
+- 📊 Interactive charts (indexing progress, cache performance)
+- 📋 Live event log
+- 🎨 Responsive design (mobile, tablet, desktop)
+- ⚡ Zero external dependencies (except Chart.js CDN)
+
+[See Dashboard Documentation →](DASHBOARD_README.md)
+
 ---
 
 ## 📚 Documentation
