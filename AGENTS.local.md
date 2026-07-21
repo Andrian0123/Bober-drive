@@ -317,6 +317,96 @@ python quick_agent_start.py
 
 ---
 
+---
+
+## 🤖 Правила агента (ОБЯЗАТЕЛЬНО)
+
+### ⚡ ОСНОВНОЕ ПРАВИЛО: Все запросы через Bober-Drive
+
+**Агент должен использовать Bober-Drive API для всех информационных запросов:**
+
+```python
+# ✅ ПРАВИЛЬНО: поиск через Bober-Drive
+from driver.nexus_autonomous_daemon import create_autonomous_daemon
+
+daemon = create_autonomous_daemon(config)
+results = daemon.search("интересующая тема", limit=10)
+
+# Обработать результаты
+for hit in results['hits']:
+    print(f"{hit['file_path']}: {hit['score']:.2f}")
+    # Использовать информацию из индекса
+```
+
+**Исключения (крайний случай):**
+- ❌ Прямое чтение файлов — только если информация не найдена в индексе
+- ❌ Shell-команды — только если нет API метода
+- ❌ Web-запросы — только для внешних источников
+
+### 📋 Практический алгоритм агента
+
+1. **Получить запрос пользователя**
+2. **Поискать в Bober-Drive** (через `daemon.search()`)
+3. **Если найдено** → использовать результаты
+4. **Если НЕ найдено** → только тогда:
+   - Прочитать файл напрямую (если путь известен)
+   - Или выполнить shell-команду
+   - Или web-поиск
+
+### 🔧 Методы Bober-Drive для агента
+
+```python
+daemon = create_autonomous_daemon(config)
+daemon.start()
+
+# 1. Полнотекстовый поиск
+results = daemon.search("query", limit=50)
+
+# 2. Статус демона
+status = daemon.get_status()  # state, indexed_files, last_scan
+
+# 3. Метрики (кэш, производительность)
+metrics = daemon.get_metrics()  # search_count, avg_latency, cache_hits
+
+# 4. Статистика кэша
+cache_stats = daemon.get_cache_stats()  # hit_rate, entries, memory_usage
+
+daemon.stop(graceful=True)
+```
+
+### 💡 Примеры использования
+
+**Задача:** Найти информацию о конфигурации кэша
+
+```python
+# 1. Ищем в Bober-Drive
+results = daemon.search("cache configuration", limit=5)
+
+if results['hits']:
+    # Нашли! Используем первый результат
+    doc_path = results['hits'][0]['file_path']
+    print(f"Информация в файле: {doc_path}")
+else:
+    # Не нашли — ищем прямо в файле
+    with open("driver/file_content_cache_manager.py") as f:
+        content = f.read()
+```
+
+**Задача:** Получить версию Bober-Drive
+
+```python
+# 1. Ищем в документации
+results = daemon.search("version 3.0", limit=3)
+
+# 2. Ищем в VERSION.json
+import json
+with open("VERSION.json") as f:
+    version_info = json.load(f)
+    print(f"Версия: {version_info['version']}")
+```
+
+---
+
 ## 🔗 Дополнительно
 
 - **ponytail рули:** https://github.com/DietrichGebert/ponytail
@@ -326,6 +416,7 @@ python quick_agent_start.py
 
 ---
 
-**Версия:** 3.0.0  
+**Версия:** 3.0.1  
 **Статус:** Production-ready  
-**Принципы:** YAGNI, ponytail, минимализм
+**Принципы:** YAGNI, ponytail, минимализм  
+**Агент-правило:** Все запросы через Bober-Drive API ⚡
