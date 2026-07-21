@@ -256,7 +256,7 @@ class NexusDIContainer:
     
     def _create_auto_updater(self, container: 'NexusDIContainer') -> Any:
         """Create Auto Updater instance"""
-        from nexus_auto_updater import AutoUpdater
+        from driver.nexus_auto_updater import AutoUpdater
         
         return AutoUpdater(
             check_interval_days=container.config.update_check_days,
