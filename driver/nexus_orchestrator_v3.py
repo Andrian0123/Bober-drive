@@ -80,7 +80,21 @@ class NexusDIContainer:
     def _register_core_services(self):
         """Register core Nexus services"""
         # Import here to avoid circular dependencies
-        from driver.core.event_bus import EventBus, EventBusConfig
+        import sys
+        from pathlib import Path
+        
+        # Гибкий импорт для работы из разных контекстов
+        try:
+            from core.event_bus import EventBus, EventBusConfig
+        except ModuleNotFoundError:
+            try:
+                from driver.core.event_bus import EventBus, EventBusConfig
+            except ModuleNotFoundError:
+                # Добавить driver в sys.path и попробовать снова
+                driver_path = str(Path(__file__).parent)
+                if driver_path not in sys.path:
+                    sys.path.insert(0, driver_path)
+                from core.event_bus import EventBus, EventBusConfig
         
         # Event Bus (singleton)
         self.register_singleton("event_bus", lambda c: EventBus(

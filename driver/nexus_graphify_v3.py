@@ -11,22 +11,55 @@ with the legacy GraphifyEngine.
 import logging
 import threading
 import time
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from nexus_graphify import GraphifyEngine, ParsedDocument, DocumentFormat
-from core.event_bus import (
-    EventBus,
-    Event,
-    DocumentImportRequested,
-    DocumentFormatDetected,
-    DocumentParsed,
-    DocumentSegmented,
-    EntitiesExtracted,
-    DocumentStoredEvent,
-    DocumentError,
-)
+
+# Гибкий импорт для работы из разных контекстов
+try:
+    from core.event_bus import (
+        EventBus,
+        Event,
+        DocumentImportRequested,
+        DocumentFormatDetected,
+        DocumentParsed,
+        DocumentSegmented,
+        EntitiesExtracted,
+        DocumentStoredEvent,
+        DocumentError,
+    )
+except ModuleNotFoundError:
+    try:
+        from driver.core.event_bus import (
+            EventBus,
+            Event,
+            DocumentImportRequested,
+            DocumentFormatDetected,
+            DocumentParsed,
+            DocumentSegmented,
+            EntitiesExtracted,
+            DocumentStoredEvent,
+            DocumentError,
+        )
+    except ModuleNotFoundError:
+        # Добавить driver в sys.path и попробовать снова
+        driver_path = str(Path(__file__).parent)
+        if driver_path not in sys.path:
+            sys.path.insert(0, driver_path)
+        from core.event_bus import (
+            EventBus,
+            Event,
+            DocumentImportRequested,
+            DocumentFormatDetected,
+            DocumentParsed,
+            DocumentSegmented,
+            EntitiesExtracted,
+            DocumentStoredEvent,
+            DocumentError,
+        )
 
 logger = logging.getLogger(__name__)
 
