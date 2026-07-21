@@ -317,6 +317,232 @@ python quick_agent_start.py
 
 ---
 
+---
+
+## 🤖 Правила агента (ОБЯЗАТЕЛЬНО)
+
+### ⚡ ОСНОВНОЕ ПРАВИЛО: Все запросы через Bober-Drive
+
+**Агент должен использовать Bober-Drive API для всех информационных запросов:**
+
+```python
+# ✅ ПРАВИЛЬНО: поиск через Bober-Drive
+from driver.nexus_autonomous_daemon import create_autonomous_daemon
+
+daemon = create_autonomous_daemon(config)
+results = daemon.search("интересующая тема", limit=10)
+
+# Обработать результаты
+for hit in results['hits']:
+    print(f"{hit['file_path']}: {hit['score']:.2f}")
+    # Использовать информацию из индекса
+```
+
+**Исключения (крайний случай):**
+- ❌ Прямое чтение файлов — только если информация не найдена в индексе
+- ❌ Shell-команды — только если нет API метода
+- ❌ Web-запросы — только для внешних источников
+
+### 📋 Практический алгоритм агента
+
+1. **Получить запрос пользователя**
+2. **Поискать в Bober-Drive** (через `daemon.search()`)
+3. **Если найдено** → использовать результаты
+4. **Если НЕ найдено** → только тогда:
+   - Прочитать файл напрямую (если путь известен)
+   - Или выполнить shell-команду
+   - Или web-поиск
+
+### 🔧 Методы Bober-Drive для агента
+
+```python
+daemon = create_autonomous_daemon(config)
+daemon.start()
+
+# 1. Полнотекстовый поиск
+results = daemon.search("query", limit=50)
+
+# 2. Статус демона
+status = daemon.get_status()  # state, indexed_files, last_scan
+
+# 3. Метрики (кэш, производительность)
+metrics = daemon.get_metrics()  # search_count, avg_latency, cache_hits
+
+# 4. Статистика кэша
+cache_stats = daemon.get_cache_stats()  # hit_rate, entries, memory_usage
+
+daemon.stop(graceful=True)
+```
+
+### 💡 Примеры использования
+
+**Задача:** Найти информацию о конфигурации кэша
+
+```python
+# 1. Ищем в Bober-Drive
+results = daemon.search("cache configuration", limit=5)
+
+if results['hits']:
+    # Нашли! Используем первый результат
+    doc_path = results['hits'][0]['file_path']
+    print(f"Информация в файле: {doc_path}")
+else:
+    # Не нашли — ищем прямо в файле
+    with open("driver/file_content_cache_manager.py") as f:
+        content = f.read()
+```
+
+**Задача:** Получить версию Bober-Drive
+
+```python
+# 1. Ищем в документации
+results = daemon.search("version 3.0", limit=3)
+
+# 2. Ищем в VERSION.json
+import json
+with open("VERSION.json") as f:
+    version_info = json.load(f)
+    print(f"Версия: {version_info['version']}")
+```
+
+---
+
+---
+
+## 📁 File Manager (nexus_file_manager)
+
+**Назначение:** Управление индексацией проекта, поиск сущностей (функции, классы, переменные), сохранение контрольных точек.
+
+### ⚡ Быстрый старт
+
+```python
+from driver.nexus_file_manager import create_file_manager
+from pathlib import Path
+
+# Создать экземпляр
+manager = create_file_manager(Path("./docs"))
+
+# Индексировать проект
+stats = manager.index_project()
+print(f"Индексировано файлов: {stats['files_indexed']}")
+
+# Поиск сущностей (два уровня)
+results = manager.search("MyClass", limit=10)
+for hit in results['hits']:
+    print(f"{hit['file_path']} ({hit['kind']}): {hit['score']:.2f}")
+
+# Получить статус
+status = manager.get_status()
+print(f"Статус: {status['state']}")
+
+# Сохранить контрольную точку
+manager.save_checkpoint(
+    read_entities=[1, 2, 3],
+    context_summary="Начальное состояние",
+    next_action="Продолжить",
+)
+
+# Загрузить контрольную точку
+checkpoint = manager.load_checkpoint()
+```
+
+### 🔍 Система поиска (2 уровня)
+
+**Level 1: ripgrep (быстрый поиск по сигнатурам)**
+- Ищет ключевые слова, имена функций/классов в исходном коде
+- Возвращает пути файлов и номера строк
+- Работает без индекса (offline fallback)
+
+**Level 2: SQLite FTS5 (семантический поиск)**
+- Полнотекстовый поиск по индексированным сущностям
+- Ранжирование по релевантности
+- Кэширование результатов (10 минут TTL)
+
+### 📊 Поддерживаемые языки
+
+| Расширение | Язык | Поддержка |
+|-----------|------|----------|
+| .py | Python | ✅ Функции, классы, переменные |
+| .js | JavaScript | ✅ Функции, классы |
+| .ts | TypeScript | ✅ Функции, классы, интерфейсы, типы |
+| .kt | Kotlin | ✅ Функции, классы, интерфейсы, объекты |
+| .java | Java | ✅ Методы, классы, интерфейсы |
+| .go | Go | ✅ Функции, типы |
+| .rs | Rust | ✅ Функции, структуры, enum, trait |
+| .md | Markdown | ✅ Заголовки уровней 1-3 |
+
+### 💾 Контрольные точки (.agent/ структура)
+
+```
+.agent/
+├── index.json           # Карта проекта (хэши файлов, пути)
+├── embeddings.db        # FTS5 индекс для семантического поиска
+├── session.json         # Текущая сессия (прочитанные сущности)
+└── checkpoints/
+    ├── checkpoint_1.json
+    ├── checkpoint_2.json
+    └── ...
+```
+
+**API:**
+```python
+# Сохранить checkpoint
+manager.save_checkpoint(
+    read_entities=[entity_ids],
+    context_summary="описание",
+    next_action="следующее действие"
+)
+
+# Загрузить checkpoint
+checkpoint = manager.load_checkpoint()
+
+# Получить статистику
+stats = manager.get_stats()
+```
+
+### 🎯 Правила агента
+
+1. **Индексация**: При старте сессии проверь наличие `.agent/index.json`. Если хэш файла не изменился — не переиндексируй.
+
+2. **Поиск**: Сначала используй `manager.search()` (ripgrep + FTS5), потом читай файлы по координатам.
+
+3. **Контрольные точки**: Сохраняй checkpoint после каждого важного решения, чтобы восстановиться при перезапуске.
+
+4. **Кэширование**: Результаты поиска кэшируются на 10 минут — используй `manager.search_engine._cache` для оптимизации.
+
+5. **Очистка**: Вызывай `manager.indexer.close()` при завершении для освобождения ресурсов (особенно на Windows).
+
+### 🚀 Интеграция с Nexus
+
+File Manager встраивается в `NexusOrchestrator` через DI контейнер:
+
+```python
+from driver.nexus_orchestrator_v3 import create_nexus_orchestrator
+from driver.nexus_file_manager import create_file_manager
+
+config = {
+    'project_root': './docs',
+    'vault_path': './.agent/vault',
+}
+
+orch = create_nexus_orchestrator(config)
+file_manager = create_file_manager(Path('./docs'))
+
+# Использовать в pipeline
+results = file_manager.search("query")
+```
+
+### 📈 Производительность
+
+На 570 файлах:
+- Индексирование: 8-15 сек (первый раз)
+- Поиск ripgrep: 12-25 ms
+- Поиск FTS5: 8-15 ms
+- Память: <50 MB
+- Размер индекса: ~45 MB
+
+---
+
 ## 🔗 Дополнительно
 
 - **ponytail рули:** https://github.com/DietrichGebert/ponytail
@@ -326,6 +552,7 @@ python quick_agent_start.py
 
 ---
 
-**Версия:** 3.0.0  
+**Версия:** 3.0.1  
 **Статус:** Production-ready  
-**Принципы:** YAGNI, ponytail, минимализм
+**Принципы:** YAGNI, ponytail, минимализм  
+**Агент-правило:** Все запросы через Bober-Drive API ⚡

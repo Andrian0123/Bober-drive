@@ -20,7 +20,8 @@
       "DI Container",
       "Pipeline Manager",
       "Auto-Updater",
-      "File Content Cache Manager (FCCM)"
+      "File Content Cache Manager (FCCM)",
+      "Nexus File Manager (Entity Indexer + 2-Level Search)"
     ],
     "legacy_v2": [
       "Project Rules Engine",
@@ -41,10 +42,11 @@
   },
   "statistics": {
     "total_loc": "25000+",
-    "v3_loc": "5843",
-    "tests": "95+",
-    "test_coverage": "85%+",
-    "documentation": "3500+ lines"
+    "v3_loc": "6706",
+    "tests": "118+",
+    "test_coverage": "87%+",
+    "documentation": "3800+ lines",
+    "new_in_3_0_1": "File Manager (863 LOC, 23 tests for entity indexing + 2-level search)"
   },
   "dependencies": {
     "required": [

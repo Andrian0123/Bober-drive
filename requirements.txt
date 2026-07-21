@@ -11,6 +11,11 @@ pyyaml>=6.0
 # Для VectorMemory (векторные операции)
 numpy>=1.21.0
 
+# Для Dashboard (веб-интерфейс)
+fastapi>=0.104.0
+uvicorn>=0.24.0
+python-multipart>=0.0.6
+
 # ===== ОПЦИОНАЛЬНЫЕ =====
 # Для BrowserAutomation (веб-автоматизация)
 playwright>=1.40.0  # Рекомендуется
@@ -31,11 +36,17 @@ mypy>=1.7.0
 
 # ===== УСТАНОВКА =====
 # Минимальная установка (только рекомендуемые):
-#   pip install pyyaml numpy
+#   pip install pyyaml numpy fastapi uvicorn
 #
 # Полная установка (с опциональными):
 #   pip install -r requirements.txt
 #
-# Для разработки:
+# Для разработки с дашбордом:
 #   pip install -r requirements.txt
 #   pip install pytest pytest-cov black flake8 mypy
+#
+# Запуск дашборда:
+#   python launch_dashboard.py
+#   # или
+#   python driver/dashboard.py --project ./docs --port 8000
+#   # откройте http://localhost:8000 в браузере

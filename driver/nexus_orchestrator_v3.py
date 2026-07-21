@@ -125,6 +125,9 @@ class NexusDIContainer:
         # Neural Reflex Engine
         self.register("neural_reflex", self._create_neural_reflex)
         
+        # File Manager (singleton for caching and state persistence)
+        self.register_singleton("file_manager", self._create_file_manager)
+        
         # Auto Updater
         if self.config.enable_auto_update:
             self.register_singleton("auto_updater", self._create_auto_updater)
@@ -238,9 +241,22 @@ class NexusDIContainer:
             event_bus=container.resolve("event_bus")
         )
     
+    def _create_file_manager(self, container: 'NexusDIContainer') -> Any:
+        """Create File Manager instance (singleton for caching and checkpoints)"""
+        from pathlib import Path
+        from driver.nexus_file_manager import create_file_manager
+        
+        # Use vault_path for database storage
+        db_path = Path(container.config.vault_path) / "file_manager.db"
+        
+        return create_file_manager(
+            project_root=container.config.project_root,
+            db_path=db_path
+        )
+    
     def _create_auto_updater(self, container: 'NexusDIContainer') -> Any:
         """Create Auto Updater instance"""
-        from nexus_auto_updater import AutoUpdater
+        from driver.nexus_auto_updater import AutoUpdater
         
         return AutoUpdater(
             check_interval_days=container.config.update_check_days,
