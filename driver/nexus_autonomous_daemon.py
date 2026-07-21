@@ -92,6 +92,11 @@ class DaemonConfig:
     reindex_max_queue_size: int = 10000
     reindex_batch_size: int = 10
     
+    # File Content Cache (v3.0.1+)
+    enable_file_cache: bool = True
+    file_cache_size_mb: int = 500
+    file_cache_max_entries: int = 1000
+    
     # Logging
     log_level: str = "INFO"
     log_file: Optional[Path] = None
@@ -168,6 +173,28 @@ class NexusAutonomousDaemon:
         
         # Metrics
         self.metrics = DaemonMetrics()
+        
+        # File Content Cache (v3.0.1+)
+        self.file_cache = None
+        self.file_reader = None
+        if self.config.enable_file_cache:
+            try:
+                from file_content_cache_manager import (
+                    FileContentCache,
+                    FileContentCacheConfig,
+                    OptimizedFileReader
+                )
+                cache_config = FileContentCacheConfig(
+                    max_cache_size_mb=self.config.file_cache_size_mb,
+                    max_entries=self.config.file_cache_max_entries
+                )
+                self.file_cache = FileContentCache(cache_config)
+                self.file_reader = OptimizedFileReader(self.file_cache, cache_config)
+            except Exception as e:
+                self.logger = logging.getLogger(self.__class__.__name__)
+                self.logger.warning(f"Failed to initialize FileContentCache: {e}. Falling back to standard reads.")
+                self.file_cache = None
+                self.file_reader = None
         
         # Logging
         self._setup_logging()
@@ -430,24 +457,80 @@ class NexusAutonomousDaemon:
             self.logger.error(f"Search failed: {e}")
             return {'error': str(e)}
     
+    def _get_cached_file_content(self, file_path: str) -> Optional[str]:
+        """
+        Get file content with cache-first strategy (v3.0.1+)
+        
+        Returns None if file not found or not supported format
+        """
+        if not self.file_reader:
+            # Fallback to direct read if cache not available
+            try:
+                return Path(file_path).read_text(encoding='utf-8', errors='replace')
+            except Exception as e:
+                self.logger.debug(f"Failed to read {file_path}: {e}")
+                return None
+        
+        try:
+            result = self.file_reader.read_optimized(Path(file_path))
+            return result[0] if result else None
+        except Exception as e:
+            self.logger.debug(f"Cache read failed for {file_path}, fallback to direct: {e}")
+            try:
+                return Path(file_path).read_text(encoding='utf-8', errors='replace')
+            except:
+                return None
+    
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get file cache statistics (v3.0.1+)"""
+        if not self.file_cache:
+            return {'cache_enabled': False}
+        
+        return {
+            'cache_enabled': True,
+            **self.file_cache.get_stats(),
+            'reader_stats': self.file_reader.get_stats() if self.file_reader else {}
+        }
+    
+    
     def get_status(self) -> Dict[str, Any]:
         """Get daemon status"""
         with self._lock:
             uptime = (time.time() - self._start_time) if self._start_time else 0.0
             
-            return {
+            status = {
                 'state': self.state.value,
                 'uptime': uptime,
                 'startup_time_ms': self.metrics.startup_time_ms,
                 'files_scanned': self.metrics.total_files_scanned,
                 'files_indexed': self.metrics.total_files_indexed,
-                'watchdog_available': WATCHDOG_AVAILABLE
+                'watchdog_available': WATCHDOG_AVAILABLE,
+                'file_cache_enabled': self.config.enable_file_cache
             }
+            
+            # Add cache stats if enabled
+            if self.file_cache:
+                cache_stats = self.file_cache.get_stats()
+                status['cache_stats'] = cache_stats
+            
+            return status
     
     def get_metrics(self) -> Dict[str, Any]:
         """Get daemon metrics"""
         with self._lock:
-            return asdict(self.metrics)
+            metrics_dict = asdict(self.metrics)
+            
+            # Add file cache metrics
+            if self.file_reader:
+                reader_stats = self.file_reader.get_stats()
+                metrics_dict['file_cache'] = {
+                    'cache_hits': reader_stats.get('cache_hits', 0),
+                    'total_reads': reader_stats.get('total_reads', 0),
+                    'cache_hit_rate_pct': reader_stats.get('cache_hit_rate_pct', 0),
+                    'avg_read_time_ms': reader_stats.get('avg_read_time_ms', 0)
+                }
+            
+            return metrics_dict
 
 
 def create_autonomous_daemon(

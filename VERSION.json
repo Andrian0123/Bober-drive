@@ -1,7 +1,7 @@
 {
   "name": "Nexus Driver - Unified Event-Driven Knowledge Management System",
-  "version": "3.0.0",
-  "build_date": "2026-07-18",
+  "version": "3.0.1",
+  "build_date": "2026-07-21",
   "architecture": "V3 Unified Event-Driven",
   "target_audience": "Large and Very Large Projects",
   "components": {
@@ -19,7 +19,8 @@
       "Nexus Orchestrator",
       "DI Container",
       "Pipeline Manager",
-      "Auto-Updater"
+      "Auto-Updater",
+      "File Content Cache Manager (FCCM)"
     ],
     "legacy_v2": [
       "Project Rules Engine",
