@@ -117,7 +117,7 @@ docker-compose up -d
 
 ### What's New in v3.0.1
 
-✨ **FCCM Integration** — File Content Cache Manager  
+#### ✨ **FCCM Integration** — File Content Cache Manager  
 - LRU cache with 500MB default limit
 - Automatic invalidation on file changes
 - 84-100x faster repeated reads
@@ -129,6 +129,31 @@ stats = daemon.get_cache_stats()
 print(f"Cache hits: {stats['hits']}")
 print(f"Cache size: {stats['size_mb']}MB")
 ```
+
+#### 📂 **File Manager Phase 1-3** — Entity Indexing & Two-Level Search
+- **IncrementalIndexer**: Hash-based file tracking with SQLite FTS5
+- **SearchEngine**: Two-level search (ripgrep fast path + semantic FTS5)
+- **CheckpointManager**: Session persistence in `.agent/` directory
+- **NexusFileManager**: Unified API for project-wide entity discovery
+
+```python
+# Entity-aware search
+from driver.nexus_file_manager import create_file_manager
+from pathlib import Path
+
+manager = create_file_manager(Path("./src"))
+results = manager.search("MyClass", limit=10)
+
+# Results include entity kind (function, class, variable, etc.)
+for hit in results['hits']:
+    print(f"{hit['file_path']} ({hit['kind']}): {hit['score']:.2f}")
+```
+
+**Features:**
+- 🔍 Supports Python, JavaScript, TypeScript, Java, Go, Rust, Markdown
+- ⚡ Ripgrep fallback for offline-first reliability
+- 💾 Checkpoint recovery for multi-session workflows
+- 📊 23/23 E2E tests passing (100% coverage)
 
 ---
 
@@ -170,6 +195,7 @@ Phase 3: MONITORING (Coming)
 | **Autonomous Daemon** | Main orchestrator | ✅ v3.0.1 |
 | **FTS5 Indexer** | Full-text search | ✅ Production |
 | **FCCM** | File caching layer | ✅ v3.0.1 NEW |
+| **File Manager** | Entity indexing & 2-level search | ✅ v3.0.1 NEW |
 | **Event Bus** | Async events | ✅ Included |
 | **gRPC Adapter** | API server | ✅ Ready |
 
@@ -246,7 +272,7 @@ python driver/dashboard.py --project ./docs --port 8000
 
 ## ✅ Tests & Quality
 
-- ✅ **19/19 tests passing** (10 FCCM + 9 E2E)
+- ✅ **42+ tests passing** (10 FCCM + 23 File Manager + 9 E2E)
 - ✅ **100% type hints** throughout codebase
 - ✅ **Comprehensive error handling**
 - ✅ **Production-ready** (used internally)
@@ -255,8 +281,9 @@ python driver/dashboard.py --project ./docs --port 8000
 
 ```bash
 # All tests
-python test_fccm_integration.py       # FCCM tests (10)
-python test_autonomous_daemon_e2e.py  # E2E tests (9)
+python test_fccm_integration.py           # FCCM tests (10)
+python test_file_manager.py               # File Manager tests (23)
+python test_autonomous_daemon_e2e.py      # E2E tests (9)
 
 # Or with pytest
 pytest test_*.py -v
@@ -317,14 +344,16 @@ systemctl start bober-drive
 ## 📈 Roadmap
 
 ### Current (v3.0.1) ✅
-- ✅ FCCM cache optimization
-- ✅ 19/19 tests passing
+- ✅ FCCM cache optimization (v3.0.1)
+- ✅ File Manager Phase 1-3 (v3.0.1 NEW)
+- ✅ 42+ tests passing (100% pass rate)
 - ✅ Production-ready
 
 ### Next (v3.1)
-- 🔄 Automatic file monitoring (Phase 3)
+- 🔄 File Manager Phase 4 (Obsidian Bridge, ML embeddings)
+- 🔄 Automatic file monitoring (Phase 3 completion)
 - 🔄 Semantic search improvements
-- 🔄 Web dashboard
+- 🔄 Web dashboard enhancements
 
 ### Future (v3.2+)
 - 🔄 Multi-process scaling
