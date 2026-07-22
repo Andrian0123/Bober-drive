@@ -19,14 +19,79 @@
 
 Bober-Drive is a **universal high-performance indexer** for documentation and knowledge bases. Built on the principles of **minimalism** and **YAGNI**, it provides lightning-fast full-text search across thousands of files with zero external dependencies.
 
+<div align="center">
+
+### 📊 At a Glance
+
+| 🎯 Feature | 💡 Value | 📈 Impact |
+|:-----------|:---------|:----------|
+| ⚡ **Search Speed** | 12-25ms | Sub-second response |
+| 💾 **Memory** | <50MB | Runs on any machine |
+| 📦 **Index Time** | 8-15s | 1000 files indexed |
+| 🔒 **Privacy** | 100% Local | No data leaves your machine |
+| 🛠️ **Setup** | 0 config | Works out of the box |
+| 🔄 **Auto-Sync** | Real-time | Always up-to-date |
+
+</div>
+
 ### ⚡ Key Highlights
 
-- 🔍 **Smart Search**: Intelligent ranking with filename/path prioritization
-- 🚄 **Lightning Fast**: 12-25ms search across 1000+ files
-- 💾 **Memory Efficient**: <50MB RAM footprint
-- 🔒 **100% Local**: Zero external calls, offline-first
-- 🎯 **Zero Config**: Works out of the box
-- 🔄 **Auto-Sync**: Real-time file monitoring and reindexing
+<table>
+<tr>
+<td width="50%">
+
+🔍 **Smart Search**
+- Intelligent ranking algorithm
+- Filename/path prioritization  
+- Separator normalization
+- Context-aware snippets
+
+💾 **Memory Efficient**
+- <50MB RAM footprint
+- LRU cache management
+- Intelligent file chunking
+- Optimized data structures
+
+🎯 **Zero Config**
+- Works out of the box
+- Sensible defaults
+- Optional customization
+- Project auto-detection
+
+</td>
+<td width="50%">
+
+🚄 **Lightning Fast**
+- 12-25ms average search
+- SQLite FTS5 engine
+- Result caching (10min)
+- Incremental indexing
+
+🔒 **100% Local**
+- Zero external calls
+- Offline-first design
+- No telemetry
+- Full data control
+
+🔄 **Auto-Sync**
+- Real-time file monitoring
+- Intelligent debounce (0.5s)
+- Background reindexing
+- Checkpoint recovery
+
+</td>
+</tr>
+</table>
+
+### 🎬 Quick Workflow
+
+```
+┌─────────────┐      ┌──────────────┐      ┌─────────────┐      ┌──────────────┐
+│   📂 Scan   │  →   │  🔨 Index    │  →   │  🔍 Search  │  →   │  ⚡ Results  │
+│   Project   │      │  Files       │      │  Query      │      │  <25ms       │
+└─────────────┘      └──────────────┘      └─────────────┘      └──────────────┘
+     8-15s                Once               Real-time            Instant
+```
 
 ---
 
@@ -209,27 +274,195 @@ context = "\n\n".join([hit['snippet'] for hit in results['hits']])
 
 ## 🏗️ Architecture
 
+### 📐 System Overview
+
+```mermaid
+graph TB
+    subgraph "🎯 User Layer"
+        A1[👤 Python Script]
+        A2[🖥️ CLI Tool]
+        A3[🌐 Web Dashboard]
+        A4[🔌 IDE Extension]
+    end
+    
+    subgraph "🚀 Autonomous Daemon Core"
+        B1[🧠 Daemon Manager]
+        B1 --> B2[📊 State Machine]
+        B2 --> B3{Phase?}
+        B3 -->|1| C1[⚙️ INITIALIZING]
+        B3 -->|2| C2[✅ READY]
+        B3 -->|3| C3[👁️ MONITORING]
+    end
+    
+    subgraph "🔍 Search Pipeline"
+        D1[📝 Query Parser]
+        D2[🔎 FTS5 Engine]
+        D3[⚡ Smart Ranking]
+        D4[💾 Result Cache]
+        D1 --> D2 --> D3 --> D4
+    end
+    
+    subgraph "📁 File System Layer"
+        E1[📂 File Scanner]
+        E2[👀 Watchdog Monitor]
+        E3[🔄 Auto-Reindex Queue]
+        E1 --> E2 --> E3
+    end
+    
+    subgraph "💾 Storage Layer"
+        F1[(🗄️ SQLite FTS5)]
+        F2[💿 Vault Storage]
+        F3[📦 LRU Cache<br/>500MB]
+    end
+    
+    A1 & A2 & A3 & A4 --> B1
+    C1 --> E1
+    C2 --> D1
+    C3 --> E2
+    D2 --> F1
+    D3 --> F3
+    E1 --> F2
+    E3 --> F1
+    
+    style B1 fill:#4CAF50,stroke:#2E7D32,color:#fff
+    style D2 fill:#2196F3,stroke:#1565C0,color:#fff
+    style F1 fill:#FF9800,stroke:#E65100,color:#fff
+    style F3 fill:#9C27B0,stroke:#6A1B9A,color:#fff
 ```
-┌─────────────────────────────────────────┐
-│     Autonomous Daemon (Phase 3)         │
-│  ┌─────────────────────────────────┐   │
-│  │   File Watch (Watchdog)          │   │
-│  │   ↓ Auto-reindex on change       │   │
-│  └─────────────────────────────────┘   │
-│                                          │
-│  ┌─────────────────────────────────┐   │
-│  │   Search Engine                  │   │
-│  │   • FTS5 Semantic Search         │   │
-│  │   • Smart Ranking Algorithm      │   │
-│  │   • Result Caching               │   │
-│  └─────────────────────────────────┘   │
-│                                          │
-│  ┌─────────────────────────────────┐   │
-│  │   File Content Cache Manager     │   │
-│  │   • LRU Cache (500MB)            │   │
-│  │   • Intelligent Eviction         │   │
-│  └─────────────────────────────────┘   │
-└─────────────────────────────────────────┘
+
+### 🔄 Three-Phase Lifecycle
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**Phase 1: INITIALIZING** 🏗️
+
+```
+📂 Project Scan
+    ↓
+📝 Parse Files
+    ↓
+🗄️ Build FTS5 Index
+    ↓
+💾 Save Checkpoint
+    ↓
+✅ → READY
+```
+
+*Full scan & index creation*
+- Scans all supported files
+- Creates SQLite FTS5 database
+- Saves state for recovery
+
+</td>
+<td width="33%" valign="top">
+
+**Phase 2: READY** ⚡
+
+```
+🔍 Accept Queries
+    ↓
+⚡ Fast Search
+    ↓
+📊 Rank Results
+    ↓
+💾 Cache Response
+    ↓
+🎯 Return to User
+```
+
+*Active search service*
+- Handles search requests
+- Uses cached results
+- Sub-25ms latency
+
+</td>
+<td width="33%" valign="top">
+
+**Phase 3: MONITORING** 👁️
+
+```
+👀 Watch Files
+    ↓
+📝 Detect Changes
+    ↓
+⏱️ Debounce (0.5s)
+    ↓
+🔄 Reindex Changed
+    ↓
+✅ Update Index
+```
+
+*Background auto-sync*
+- Real-time file monitoring
+- Intelligent debounce
+- Incremental updates
+
+</td>
+</tr>
+</table>
+
+### 🎯 Component Details
+
+#### 🔍 Search Engine (FTS5-powered)
+
+```
+Query: "cache manager"
+    ↓
+┌─────────────────────────────────────┐
+│ 1. Normalize                        │ → "cache_manager" = "cache-manager" = "cache.manager"
+├─────────────────────────────────────┤
+│ 2. FTS5 Full-Text Search            │ → SQLite MATCH query
+├─────────────────────────────────────┤
+│ 3. Smart Ranking                    │ → +120 filename, +45 path bonus
+├─────────────────────────────────────┤
+│ 4. Snippet Generation               │ → Context ±90 chars
+├─────────────────────────────────────┤
+│ 5. Cache Result (10min TTL)         │ → In-memory LRU cache
+└─────────────────────────────────────┘
+    ↓
+Results with scores
+```
+
+#### 💾 File Content Cache Manager
+
+```
+Request File → Check Hash → Cache Hit? → Return Content ⚡
+                    ↓           ↓ No
+                  Changed?    Read File
+                    ↓           ↓
+                Update Hash   Store in Cache
+                    ↓           ↓
+                Return New    Return Content
+```
+
+**Cache Strategy:**
+- 🎯 LRU eviction (Least Recently Used)
+- 💾 Max 500MB / 1000 entries
+- ⏱️ 10min TTL per entry
+- 🔍 Content hash-based validation
+
+### 📊 Data Flow
+
+```
+User Query "authentication"
+    ↓
+[Daemon API] → search(query, limit=10)
+    ↓
+[Query Parser] → normalize → "authentication"
+    ↓
+[Check Cache] → Miss ❌
+    ↓
+[FTS5 Engine] → SELECT ... WHERE content MATCH 'authentication' 
+    ↓
+[Rank Results] → filename_match(+120) + path_match(+45) + fts_score
+    ↓
+[Generate Snippets] → "...user authentication via OAuth2..."
+    ↓
+[Cache Result] → store for 10min
+    ↓
+[Return JSON] → {hits: [...], total: 42, took_ms: 15}
 ```
 
 ---
