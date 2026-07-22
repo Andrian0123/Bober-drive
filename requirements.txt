@@ -1,0 +1,52 @@
+# Nexus v3.0.0 - Зависимости
+
+# ===== ОБЯЗАТЕЛЬНЫЕ (Python Standard Library) =====
+# pathlib, json, sqlite3, dataclasses, typing, re, subprocess, datetime
+# Эти модули входят в стандартную библиотеку Python 3.7+
+
+# ===== РЕКОМЕНДУЕМЫЕ =====
+# Для ProjectRegistry (YAML конфигурация)
+pyyaml>=6.0
+
+# Для VectorMemory (векторные операции)
+numpy>=1.21.0
+
+# Для Dashboard (веб-интерфейс)
+fastapi>=0.104.0
+uvicorn>=0.24.0
+python-multipart>=0.0.6
+
+# ===== ОПЦИОНАЛЬНЫЕ =====
+# Для BrowserAutomation (веб-автоматизация)
+playwright>=1.40.0  # Рекомендуется
+selenium>=4.15.0    # Альтернатива
+
+# Для HTTP запросов (если понадобится)
+requests>=2.31.0
+
+# ===== ДЛЯ РАЗРАБОТКИ =====
+# Тестирование
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Линтеры и форматирование
+black>=23.0.0
+flake8>=6.1.0
+mypy>=1.7.0
+
+# ===== УСТАНОВКА =====
+# Минимальная установка (только рекомендуемые):
+#   pip install pyyaml numpy fastapi uvicorn
+#
+# Полная установка (с опциональными):
+#   pip install -r requirements.txt
+#
+# Для разработки с дашбордом:
+#   pip install -r requirements.txt
+#   pip install pytest pytest-cov black flake8 mypy
+#
+# Запуск дашборда:
+#   python launch_dashboard.py
+#   # или
+#   python driver/dashboard.py --project ./docs --port 8000
+#   # откройте http://localhost:8000 в браузере

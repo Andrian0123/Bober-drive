@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Nexus specific
+storage/
+.nexus/
+.bober-drive/
+*.vault
+*.db
+*.log
+
+# Build artifacts
+*.zip
+*.tar.gz
+
+# Temporary
+tmp/
+*.tmp
+*.bak
+
+# Environment
+.env
+.env.local
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
