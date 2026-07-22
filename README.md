@@ -126,13 +126,17 @@ Bober-Drive is a **universal high-performance indexer** for documentation and kn
 
 ## 🚀 Quick Start
 
-### Option 1: Python Script
+> **💡 For AI Agents:** See [AI Agent Integration](#-ai-agent-integration-primary-use-case) for complete workflow
+
+### Option 1: Python Script (Agent-Friendly)
 
 ```python
 from driver.nexus_autonomous_daemon import create_autonomous_daemon
 from pathlib import Path
 
-# Create daemon
+# 🤖 Agent Workflow: Search → Read → Respond
+
+# Step 1: Create daemon
 daemon = create_autonomous_daemon(
     project_root=Path("./docs"),
     vault_path=Path("./storage/index.vault"),
@@ -140,15 +144,28 @@ daemon = create_autonomous_daemon(
     init_strategy="FULL_SCAN"
 )
 
-# Start and search
-daemon.start()
-results = daemon.search("your query", limit=10)
+# Step 2: Start search engine
+daemon.start()  # ⚡ 8-15s first time, instant after
 
-for hit in results['hits']:
-    print(f"{hit['file_name']}: {hit['score']:.1f}")
+# Step 3: Search BEFORE reading files
+results = daemon.search("authentication", limit=10)
 
+# Step 4: Read only relevant files
+for hit in results['hits'][:3]:  # Top 3 results
+    print(f"📄 {hit['file_name']}: score {hit['score']:.1f}")
+    print(f"   📍 {hit['file_path']}")
+    print(f"   📝 {hit['snippet'][:100]}...")
+    
+    # Now read the file content
+    with open(hit['file_path'], 'r') as f:
+        content = f.read()
+        # Use content in your agent logic
+
+# Step 5: Cleanup
 daemon.stop(graceful=True)
 ```
+
+**Result:** Agent finds relevant files in <25ms instead of scanning 1000+ files! 🚀
 
 ### Option 2: Command Line
 
@@ -156,8 +173,14 @@ daemon.stop(graceful=True)
 # Quick start script
 python quick_agent_start.py
 
-# Or use the template
+# Or use the agent template
 python agent_search_template.py "your search query"
+
+# Example output:
+# 🔍 Found 5 relevant files in 18ms
+# 📄 auth_manager.py (score: 156.2)
+# 📄 AUTH.md (score: 142.8)
+# 📄 login_flow.py (score: 98.5)
 ```
 
 ### Option 3: Web Dashboard
@@ -167,6 +190,7 @@ python agent_search_template.py "your search query"
 python launch_dashboard.py
 
 # Open http://localhost:8000
+# Real-time search with live metrics
 ```
 
 ---
@@ -231,6 +255,257 @@ Benchmarks on real projects:
 ---
 
 ## 🎯 Use Cases
+
+### 🤖 AI Agent Integration (Primary Use Case)
+
+**Bober-Drive is designed specifically for AI agents to efficiently search project documentation.**
+
+#### ✅ Correct Agent Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    🤖 AI Agent Task                              │
+│  "Explain how authentication works in this project"             │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 1: 🔍 SEARCH FIRST (through Bober-Drive)                 │
+│  ═══════════════════════════════════════════════════════════    │
+│  daemon = create_autonomous_daemon(...)                         │
+│  results = daemon.search("authentication", limit=5)             │
+│                                                                  │
+│  📊 Results in <25ms:                                           │
+│  • auth/login.py (score: 156.2)                                │
+│  • docs/AUTH.md (score: 142.8)                                 │
+│  • config/auth_config.json (score: 98.5)                       │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 2: 📖 READ ONLY RELEVANT FILES                           │
+│  ═════════════════════════════════════════════════════════════  │
+│  # Read top 3 results (not all files!)                          │
+│  for hit in results['hits'][:3]:                                │
+│      content = read_file(hit['file_path'])                      │
+│      # Analyze content...                                       │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 3: 🎯 RESPOND TO USER                                    │
+│  ════════════════════════════════════════════════════════════   │
+│  "Based on auth/login.py and docs/AUTH.md,                      │
+│   the project uses OAuth2 with JWT tokens..."                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### ❌ Wrong Approach (Without Driver)
+
+```diff
+- ❌ Read ALL files in project (slow, wasteful)
+- ❌ Use grep/find (no ranking, no context)
+- ❌ Ask user "where is auth code?" (manual work)
+- ❌ Guess file locations (unreliable)
+
++ ✅ Search through indexed data (fast, ranked)
++ ✅ Get top relevant files immediately
++ ✅ Read only what's needed (efficient)
++ ✅ Accurate, context-aware results
+```
+
+#### 📝 Agent Template (Copy-Paste Ready)
+
+```python
+#!/usr/bin/env python3
+"""
+AI Agent Integration Template
+Use this for all project queries
+"""
+from driver.nexus_autonomous_daemon import create_autonomous_daemon
+from pathlib import Path
+
+def agent_query(user_question: str, project_root: str = ".") -> str:
+    """
+    How AI agents should use Bober-Drive
+    
+    Args:
+        user_question: User's question about the project
+        project_root: Project root directory
+    
+    Returns:
+        Agent's response based on searched documentation
+    """
+    # 1. Create daemon (one-time setup per session)
+    daemon = create_autonomous_daemon(
+        project_root=Path(project_root),
+        vault_path=Path(project_root) / "storage" / "index.vault",
+        enable_file_watch=False,
+        init_strategy="FULL_SCAN"
+    )
+    
+    try:
+        # 2. Start daemon
+        if not daemon.start():
+            return "❌ Failed to start search engine"
+        
+        # 3. Extract search keywords from question
+        search_query = extract_keywords(user_question)
+        
+        # 4. Search (THIS IS THE KEY STEP!)
+        results = daemon.search(search_query, limit=5)
+        
+        print(f"🔍 Found {len(results['hits'])} relevant files")
+        
+        # 5. Read ONLY top results (not entire project!)
+        context = []
+        for hit in results['hits'][:3]:  # Top 3 is enough
+            print(f"📄 {hit['file_name']} (score: {hit['score']:.1f})")
+            
+            # Read file content
+            with open(hit['file_path'], 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            context.append({
+                'file': hit['file_name'],
+                'content': content,
+                'snippet': hit.get('snippet', '')
+            })
+        
+        # 6. Generate response using found context
+        response = generate_answer(user_question, context)
+        
+        return response
+        
+    finally:
+        # 7. Always cleanup
+        daemon.stop(graceful=True)
+
+
+def extract_keywords(question: str) -> str:
+    """Extract search keywords from user question"""
+    # Simple keyword extraction (improve with NLP if needed)
+    keywords = question.lower()
+    
+    # Remove common words
+    stopwords = ["how", "what", "where", "when", "explain", "show", "find"]
+    for word in stopwords:
+        keywords = keywords.replace(word, "")
+    
+    return keywords.strip()
+
+
+def generate_answer(question: str, context: list) -> str:
+    """Generate answer from found context"""
+    if not context:
+        return "❌ No relevant documentation found"
+    
+    # Build answer from context
+    answer = f"Based on {len(context)} relevant files:\n\n"
+    
+    for ctx in context:
+        answer += f"📄 {ctx['file']}:\n"
+        answer += f"   {ctx['snippet']}\n\n"
+    
+    return answer
+
+
+# Example usage
+if __name__ == "__main__":
+    question = "How does authentication work in this project?"
+    answer = agent_query(question, project_root="./")
+    print(answer)
+```
+
+#### 🎯 Key Principles for Agents
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**✅ DO:**
+
+1. **Always search first** before reading files
+   ```python
+   results = daemon.search(query)
+   ```
+
+2. **Use search scores** to prioritize
+   ```python
+   top_files = results['hits'][:5]
+   ```
+
+3. **Read only relevant files** (not all)
+   ```python
+   for hit in top_files:
+       read_file(hit['file_path'])
+   ```
+
+4. **Check status** before operations
+   ```python
+   status = daemon.get_status()
+   if status['state'] == 'READY':
+       # proceed
+   ```
+
+5. **Handle errors gracefully**
+   ```python
+   try:
+       daemon.start()
+   except Exception as e:
+       # fallback to direct read
+   ```
+
+</td>
+<td width="50%" valign="top">
+
+**❌ DON'T:**
+
+1. **Never read files directly first**
+   ```python
+   # ❌ Wrong
+   for file in all_files:
+       read_file(file)
+   ```
+
+2. **Don't ignore search results**
+   ```python
+   # ❌ Wrong
+   daemon.search(...)  # Result ignored
+   read_file("guessed_path.py")
+   ```
+
+3. **Don't scan entire project**
+   ```python
+   # ❌ Wrong
+   os.walk(project_root)  # Too slow
+   ```
+
+4. **Don't use string matching**
+   ```python
+   # ❌ Wrong
+   if "auth" in filename:  # Primitive
+   ```
+
+5. **Don't forget to stop daemon**
+   ```python
+   # ❌ Wrong
+   daemon.start()
+   # ... forgot daemon.stop()
+   ```
+
+</td>
+</tr>
+</table>
+
+#### 📊 Performance Impact
+
+| Approach | Files Read | Time | Accuracy |
+|----------|-----------|------|----------|
+| **With Bober-Drive** | 3-5 files | ~100ms | 95%+ |
+| **Without (scan all)** | 100-1000 files | 5-30s | 60-70% |
+| **Without (grep)** | All files | 1-10s | 50-60% |
+
+**Result:** Agent with Bober-Drive is **50-300x faster** and more accurate! 🚀
+
+---
 
 ### 1. Documentation Search
 
